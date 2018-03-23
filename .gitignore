@@ -1,1 +1,8 @@
+### ZIPS ###
 *.zip
+
+### BUILD ###
+_build/*
+
+### BYTES ###
+*.byte
