@@ -1,0 +1,50 @@
+### Starting build.
+# Target: infer.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:infer.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules infer.ml > infer.ml.depends
+# Target: ast.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:ast.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules ast.ml > ast.ml.depends # cached
+# Target: ast.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:ast.cmo, file:ast.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o ast.cmo ast.ml # cached
+# Target: examples.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:examples.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules examples.ml > examples.ml.depends # cached
+# Target: examples.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:examples.cmo, file:examples.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o examples.cmo examples.ml # cached
+# Target: lexer.mll, tags: { package(oUnit), bin_annot, extension:mll, file:lexer.mll, lexer, ocaml, ocamllex, quiet }
+/home/numbahs/.opam/4.06.0/bin/ocamllex.opt -q lexer.mll # cached
+# Target: lexer.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:lexer.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules lexer.ml > lexer.ml.depends # cached
+# Target: parser.mly.depends, tags: { package(oUnit), bin_annot, extension:mly, file:parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' parser.mly > parser.mly.depends # cached
+# Target: parser.mly, tags: { package(oUnit), bin_annot, byte, compile, extension:ml, extension:mly, file:parser.ml, file:parser.mly, infer, menhir, ocaml, parser, quiet }
+menhir --ocamlc 'ocamlfind ocamlc -bin-annot -package oUnit' --infer parser.mly # cached
+# Target: parser.mli.depends, tags: { package(oUnit), bin_annot, extension:mli, file:parser.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules parser.mli > parser.mli.depends # cached
+# Target: parser.cmi, tags: { package(oUnit), bin_annot, byte, compile, extension:mli, file:parser.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o parser.cmi parser.mli # cached
+# Target: lexer.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:lexer.cmo, file:lexer.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o lexer.cmo lexer.ml # cached
+# Target: subs.mli.depends, tags: { package(oUnit), bin_annot, extension:mli, file:subs.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules subs.mli > subs.mli.depends # cached
+# Target: subs.cmi, tags: { package(oUnit), bin_annot, byte, compile, extension:mli, file:subs.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o subs.cmi subs.mli # cached
+# Target: unification.mli.depends, tags: { package(oUnit), bin_annot, extension:mli, file:unification.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules unification.mli > unification.mli.depends # cached
+# Target: unification.cmi, tags: { package(oUnit), bin_annot, byte, compile, extension:mli, file:unification.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o unification.cmi unification.mli # cached
+# Target: infer.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:infer.cmo, file:infer.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o infer.cmo infer.ml
+# Target: parser.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:parser.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules parser.ml > parser.ml.depends # cached
+# Target: parser.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:parser.cmo, file:parser.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o parser.cmo parser.ml # cached
+# Target: subs.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:subs.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules subs.ml > subs.ml.depends # cached
+# Target: unification.ml.depends, tags: { package(oUnit), bin_annot, extension:ml, file:unification.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -package oUnit -modules unification.ml > unification.ml.depends # cached
+# Target: subs.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:subs.cmo, file:subs.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o subs.cmo subs.ml
+# Target: unification.cmo, tags: { package(oUnit), bin_annot, byte, compile, extension:cmo, extension:ml, file:unification.cmo, file:unification.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -bin-annot -package oUnit -o unification.cmo unification.ml
+# Target: infer.byte, tags: { package(oUnit), bin_annot, byte, dont_link_with, extension:byte, file:infer.byte, link, ocaml, program, quiet }
+ocamlfind ocamlc -linkpkg -package oUnit ast.cmo examples.cmo parser.cmo lexer.cmo subs.cmo unification.cmo infer.cmo -o infer.byte
+# Compilation successful.
