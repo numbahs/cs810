@@ -23,7 +23,10 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
        (match infer' e2 n1 with
         | OK(n2, (tc2, _, t2)) -> 
           (match mgu [(t1, IntType);(t2, IntType)] with
-           | UOk sub -> OK(n2, (sub, e, IntType))
+           | UOk sub -> 
+             apply_to_env tc1 tc2;
+             apply_to_env tc2 sub;
+             OK(n2, (sub, e, IntType))
            | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
         | Error s -> Error s)
      | Error s -> Error s)
@@ -65,8 +68,16 @@ let inf (e:string) : string =
 let test (n:int) : string =
   Examples.expr n |> parse |> infer_type
 
+let subst_tests = function
+  | 1 -> string_of_mgu @@ mgu [(VarType "x", VarType "_V0")]
+  | 2 -> string_of_mgu @@ mgu []
+  | 3 -> string_of_mgu @@ mgu [(VarType "_V0", IntType); (VarType "_V1", IntType)]
+  | n -> failwith "Oops"
+
 let print_tests () = 
-  for i=1 to 20 do
+  for i=1 to 3 do
+    print_string @@ subst_tests i;
+    print_string "\n";
     print_string @@ inf @@ Examples.expr i;
     print_string "\n";
   done;;

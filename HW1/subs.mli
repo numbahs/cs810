@@ -11,7 +11,7 @@ val lookup : subst -> string -> Ast.texpr option
 
 val apply_to_texpr : subst -> Ast.texpr -> Ast.texpr
 
-val apply_to_expr : subst -> Ast.expr -> Ast.expr
+(* val apply_to_expr : subst -> Ast.expr -> Ast.expr *)
 
 val apply_to_env : subst -> subst -> unit
 
