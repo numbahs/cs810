@@ -10,22 +10,23 @@ type typing_judgement = subst*expr*texpr
 let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
   match e with
   | Unit  -> OK(n, (create (), e, UnitType))
-  | Var s -> let sub = (create ()) in
-    begin
-      extend sub s IntType;
-      OK(n, (sub, e, VarType s))
-    end
   | Int n -> OK(n, (create (), e, IntType))
+  | Var s -> 
+    let sub = (create ())
+    and ftn = "_V" ^ string_of_int (n) in
+    let ft = VarType ftn in
+    extend sub s ft;
+    OK(n + 1, (sub, e, ft))
   | Add(e1,e2) | Sub(e1, e2) | Mul(e1, e2) | Div(e1, e2) -> 
-    (match (infer' e1 n, infer' e2 n) with
-     | (OK(_, (sub1, _, x)), OK(_, (sub2, _, y))) -> 
-       (match (x,y) with
-        | (VarType s1, VarType s2) -> 
-          OK(n, (create (), e, IntType))
-        | (VarType s1, IntType) | (IntType, VarType s1) -> 
-          OK(n, (create (), e, IntType))
-        | _ -> Error("args to operations must evaluate to integers"))
-     | (Error x, _) | (_, Error x) -> Error(x))
+    (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+       (match infer' e2 n1 with
+        | OK(n2, (tc2, _, t2)) -> 
+          (match mgu [(t1, IntType);(t2, IntType)] with
+           | UOk sub -> OK(n2, (sub, e, IntType))
+           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+        | Error s -> Error s)
+     | Error s -> Error s)
   | NewRef(e) -> failwith "undefined"
   | DeRef(e) -> failwith "undefined"
   | SetRef(e1,e2) -> failwith "undefined"
@@ -39,11 +40,10 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
   | LetrecUntyped(x,param,def,body) -> failwith "undefined"
   | Set(x,rhs) -> failwith "undefined"
   | BeginEnd(es) -> failwith "undefined"
-and op (e1: expr) (e2: expr) = 
 
-  let string_of_typing_judgement (sub, expr, texpr) = 
-    "(" ^ (Subs.string_of_subs sub) ^ "), " ^ (Ast.string_of_expr expr) ^ ", " ^ (Ast.string_of_texpr texpr) ^ ")"
-
+let string_of_typing_judgement (s,e,t) =
+  "\027[31m "^string_of_subs s^"\027[37m |- \027[34m"^string_of_expr e
+  ^": \027[30m "^string_of_texpr t
 
 let infer_type (AProg e) =
   match infer' e 0 with
@@ -64,3 +64,9 @@ let inf (e:string) : string =
 
 let test (n:int) : string =
   Examples.expr n |> parse |> infer_type
+
+let print_tests () = 
+  for i=1 to 20 do
+    print_string @@ inf @@ Examples.expr i;
+    print_string "\n";
+  done;;
