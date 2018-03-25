@@ -9,13 +9,23 @@ type typing_judgement = subst*expr*texpr
 
 let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
   match e with
-  | Unit  -> failwith "undefined"
-  | Var s -> failwith "undefined"
-  | Int n -> failwith "undefined"
-  | Add(e1,e2) -> failwith "undefined"
-  | Sub(e1,e2) -> failwith "undefined"
-  | Mul(e1,e2) -> failwith "undefined"
-  | Div(e1,e2) -> failwith "undefined"
+  | Unit  -> OK(n, (create (), e, UnitType))
+  | Var s -> let sub = (create ()) in
+    begin
+      extend sub s IntType;
+      OK(n, (sub, e, VarType s))
+    end
+  | Int n -> OK(n, (create (), e, IntType))
+  | Add(e1,e2) | Sub(e1, e2) | Mul(e1, e2) | Div(e1, e2) -> 
+    (match (infer' e1 n, infer' e2 n) with
+     | (OK(_, (sub1, _, x)), OK(_, (sub2, _, y))) -> 
+       (match (x,y) with
+        | (VarType s1, VarType s2) -> 
+          OK(n, (create (), e, IntType))
+        | (VarType s1, IntType) | (IntType, VarType s1) -> 
+          OK(n, (create (), e, IntType))
+        | _ -> Error("args to operations must evaluate to integers"))
+     | (Error x, _) | (_, Error x) -> Error(x))
   | NewRef(e) -> failwith "undefined"
   | DeRef(e) -> failwith "undefined"
   | SetRef(e1,e2) -> failwith "undefined"
@@ -29,10 +39,10 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
   | LetrecUntyped(x,param,def,body) -> failwith "undefined"
   | Set(x,rhs) -> failwith "undefined"
   | BeginEnd(es) -> failwith "undefined"
-  | _ -> failwith "infer: undefined"
+and op (e1: expr) (e2: expr) = 
 
-let string_of_typing_judgement (sub, expr, texpr) = 
-  "(" ^ (Subs.string_of_subs sub) ^ "), " ^ (Ast.string_of_expr expr) ^ ", " ^ (Ast.string_of_texpr texpr) ^ ")"
+  let string_of_typing_judgement (sub, expr, texpr) = 
+    "(" ^ (Subs.string_of_subs sub) ^ "), " ^ (Ast.string_of_expr expr) ^ ", " ^ (Ast.string_of_texpr texpr) ^ ")"
 
 
 let infer_type (AProg e) =
