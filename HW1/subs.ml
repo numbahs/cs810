@@ -20,27 +20,24 @@ let rec apply_to_texpr (s:subst) = function
   | t1 -> t1
 
 (* let rec apply_to_expr (s:subst)  *)
+let apply_to_env (s1:subst) (s2:subst):unit = 
+  Hashtbl.iter (fun k t1 -> 
+      let look = string_of_varType t1 in
+      match lookup s2 look with
+      | None -> extend s2 k t1
+      | Some (t2) -> remove s2 look; extend s2 k t2) s1
 
 let key_value (s: subst) = Hashtbl.fold(fun k v acc -> (k, v)::acc) s []
 
 let domain (sub: subst): string list = 
   Hashtbl.fold(fun k v acc -> (k)::acc) sub []
 
-let subjoin (s1:subst) (s2:subst) : subst =
-  List.iter (fun (k, v) -> extend s2 k v) @@ key_value s1;
-  s2
-
 let rec join = function
   | [] -> (create ())
-  | [x] -> x
-  | hd1::hd2::tl -> join @@ ((subjoin hd1 hd2)::tl)
-
-let apply_to_env (s1:subst) (s2:subst):unit = 
-  Hashtbl.iter (fun k v -> 
-      let look = string_of_varType v in
-      match lookup s2 look with
-      | None -> extend s2 k v
-      | Some (t2) -> remove s2 look; extend s2 k t2) s1
+  | [hd] -> hd
+  | hd1::hd2::tl -> 
+    apply_to_env hd1 hd2;
+    join @@ hd2::tl
 
 
 let rec string_of_subst_pairs = function

@@ -23,22 +23,70 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
        (match infer' e2 n1 with
         | OK(n2, (tc2, _, t2)) -> 
           (match mgu [(t1, IntType);(t2, IntType)] with
-           | UOk sub -> 
-             apply_to_env tc1 tc2;
-             apply_to_env tc2 sub;
-             OK(n2, (sub, e, IntType))
+           | UOk sub -> OK(n2, (join @@ [tc1;tc2;sub], e, IntType))
            | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
-        | Error s -> Error s)
-     | Error s -> Error s)
-  | NewRef(e) -> failwith "undefined"
-  | DeRef(e) -> failwith "undefined"
-  | SetRef(e1,e2) -> failwith "undefined"
+        | er -> er)
+     | er -> er)
+  | NewRef(e1) -> 
+    (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+       let ft = VarType ("_V"^(string_of_int n1)) in
+       (match mgu [(t1, ft)] with
+        | UOk sub -> OK(n1 + 1, (join @@ [tc1;sub], e, RefType ft))
+        | UError (t2, t3) -> Error ("cannot unify " ^ (string_of_texpr t2) ^ " and " ^ (string_of_texpr t3)))
+     | er -> er)
+  | DeRef(e1) -> 
+    (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+       let ft = VarType ("_V"^(string_of_int n1)) in
+       (match mgu [(t1, RefType ft)] with
+        | UOk sub -> OK(n1 + 1, (join @@ [tc1;sub], e, ft))
+        | UError (t2, t3) -> Error ("cannot unify " ^ (string_of_texpr t2) ^ " and " ^ (string_of_texpr t3)))
+     | er -> er)
+  | SetRef(e1,e2) -> 
+    (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+       (match infer' e2 n1 with 
+        | OK(n2, (tc2, _, t2)) -> 
+          let ft = VarType ("_V"^(string_of_int n2)) in
+          (match mgu [(t1, RefType ft);(t2, ft)] with
+           | UOk sub -> OK(n1 + 1, (join @@ [tc1;tc2;sub], e, UnitType))
+           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+        | er -> er)
+     | er -> er)
   | Let(x,def,body) -> failwith "undefined"
   | Proc(x,t,body) -> failwith "undefined"
   | ProcUntyped(x,body) -> failwith "undefined"
   | App(e1,e2) -> failwith "undefined"
-  | IsZero(e) -> failwith "undefined"
-  | ITE(e1,e2,e3) -> failwith "undefined"
+  (* (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+     (match infer' e2 n1 with
+      | OK(n2, (tc2, _, t2)) -> 
+        (match mgu [(t1, FuncType(t2, VarType(string_of_int n2)))] with
+         | UOk sub ->  
+         | Uerror (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+      | e -> e)
+     | e -> e) *)
+  | IsZero(e1) -> 
+    (match infer' e1 n with 
+     | OK(n1, (tc1, _, t1)) -> 
+       (match mgu [(t1, IntType)] with
+        | UOk sub -> OK(n1, (join @@ [tc1;sub], e, BoolType))
+        | UError (t2, t3) -> Error ("cannot unify " ^ (string_of_texpr t2) ^ " and " ^ (string_of_texpr t3)))
+     | er -> er)
+  | ITE(e1,e2,e3) -> 
+    (match infer' e1 n with
+     | OK(n1, (tc1, _, t1)) -> 
+       (match infer' e2 n1 with
+        | OK(n2, (tc2, _, t2)) -> 
+          (match infer' e3 n2 with
+           | OK(n3, (tc3, _, t3)) ->
+             (match mgu [(t1, BoolType);(t3, t2)] with
+              | UOk sub -> OK(n2, (join @@ [tc1;tc2;tc3;sub], e, t2))
+              | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+           | er -> er)
+        | er -> er)
+     | er -> er)
   | Letrec(tRes,x,param,tPara, def,body) -> failwith "undefined"
   | LetrecUntyped(x,param,def,body) -> failwith "undefined"
   | Set(x,rhs) -> failwith "undefined"
@@ -75,9 +123,15 @@ let subst_tests = function
   | n -> failwith "Oops"
 
 let print_tests () = 
-  for i=1 to 3 do
-    print_string @@ subst_tests i;
-    print_string "\n";
+  for i=1 to 4 do
+    (* print_string @@ subst_tests i;
+       print_string "\n"; *)
     print_string @@ inf @@ Examples.expr i;
     print_string "\n";
-  done;;
+  done;
+  for i=25 to 34 do
+    (* print_string @@ subst_tests i;
+       print_string "\n"; *)
+    print_string @@ inf @@ Examples.expr i;
+    print_string "\n";
+  done;
