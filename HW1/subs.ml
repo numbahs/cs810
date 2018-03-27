@@ -22,23 +22,24 @@ let rec apply_to_texpr (s:subst) = function
 (* let rec apply_to_expr (s:subst)  *)
 let apply_to_env (s1:subst) (s2:subst):unit = 
   Hashtbl.iter (fun k t1 -> 
-      let look = string_of_varType t1 in
-      match lookup s2 look with
-      | None -> extend s2 k t1
-      | Some (t2) -> remove s2 look; extend s2 k t2) s1
+      match lookup s2 k with
+      | None -> extend s2 k @@ apply_to_texpr s1 t1
+      | Some (t2) -> remove s2 k; extend s2 k @@ apply_to_texpr s1 t2) s1
+
+let merge_two_subst (s1:subst) (s2:subst):subst = 
+  Hashtbl.iter (fun k t1 -> 
+      match lookup s1 k with
+      | None -> extend s1 k @@ apply_to_texpr s1 t1
+      | Some (t2) -> remove s1 k; extend s1 k @@ apply_to_texpr s1 t2) s2;
+  s1
 
 let key_value (s: subst) = Hashtbl.fold(fun k v acc -> (k, v)::acc) s []
 
 let domain (sub: subst): string list = 
   Hashtbl.fold(fun k v acc -> (k)::acc) sub []
 
-let rec join = function
-  | [] -> (create ())
-  | [hd] -> hd
-  | hd1::hd2::tl -> 
-    apply_to_env hd1 hd2;
-    join @@ hd2::tl
-
+let join (lst:subst list):subst =
+  List.fold_left (fun x y -> merge_two_subst x y) (create ()) lst
 
 let rec string_of_subst_pairs = function
   | [] -> "empty"

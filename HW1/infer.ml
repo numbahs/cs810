@@ -13,8 +13,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
   | Int n -> OK(n, (create (), e, IntType))
   | Var s -> 
     let sub = (create ())
-    and ftn = "_V" ^ string_of_int (n) in
-    let ft = VarType ftn in
+    and ft = VarType ("_V" ^ string_of_int (n)) in
     extend sub s ft;
     OK(n + 1, (sub, e, ft))
   | Add(e1,e2) | Sub(e1, e2) | Mul(e1, e2) | Div(e1, e2) -> 
@@ -24,34 +23,29 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
         | OK(n2, (tc2, _, t2)) -> 
           (match mgu [(t1, IntType);(t2, IntType)] with
            | UOk sub -> OK(n2, (join @@ [tc1;tc2;sub], e, IntType))
-           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+           | UError (t1, t2) -> Error ("cannot unify " ^ (string_of_texpr t1) ^ " and " ^ (string_of_texpr t2)))
         | er -> er)
      | er -> er)
   | NewRef(e1) -> 
     (match infer' e1 n with
-     | OK(n1, (tc1, _, t1)) -> 
-       let ft = VarType ("_V"^(string_of_int n1)) in
-       (match mgu [(t1, ft)] with
-        | UOk sub -> OK(n1 + 1, (join @@ [tc1;sub], e, RefType ft))
-        | UError (t2, t3) -> Error ("cannot unify " ^ (string_of_texpr t2) ^ " and " ^ (string_of_texpr t3)))
+     | OK(n1, (tc1, _, t1)) -> OK(n1, (tc1, e, RefType t1))
      | er -> er)
   | DeRef(e1) -> 
     (match infer' e1 n with
      | OK(n1, (tc1, _, t1)) -> 
-       let ft = VarType ("_V"^(string_of_int n1)) in
-       (match mgu [(t1, RefType ft)] with
-        | UOk sub -> OK(n1 + 1, (join @@ [tc1;sub], e, ft))
-        | UError (t2, t3) -> Error ("cannot unify " ^ (string_of_texpr t2) ^ " and " ^ (string_of_texpr t3)))
+       (match t1 with
+        | RefType x -> OK(n1, (tc1, e, x))
+        | VarType x -> OK(n1, (tc1, e, VarType x))
+        | t -> Error (string_of_texpr t ^ " must be a RefType or VarType"))
      | er -> er)
   | SetRef(e1,e2) -> 
     (match infer' e1 n with
      | OK(n1, (tc1, _, t1)) -> 
        (match infer' e2 n1 with 
         | OK(n2, (tc2, _, t2)) -> 
-          let ft = VarType ("_V"^(string_of_int n2)) in
-          (match mgu [(t1, RefType ft);(t2, ft)] with
+          (match mgu [(t1, RefType t2)] with
            | UOk sub -> OK(n1 + 1, (join @@ [tc1;tc2;sub], e, UnitType))
-           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
+           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr @@ t3) ^ " and " ^ (string_of_texpr t4)))
         | er -> er)
      | er -> er)
   | Let(x,def,body) -> failwith "undefined"
@@ -116,22 +110,38 @@ let inf (e:string) : string =
 let test (n:int) : string =
   Examples.expr n |> parse |> infer_type
 
-let subst_tests = function
+let mgu_tests = function
   | 1 -> string_of_mgu @@ mgu [(VarType "x", VarType "_V0")]
   | 2 -> string_of_mgu @@ mgu []
   | 3 -> string_of_mgu @@ mgu [(VarType "_V0", IntType); (VarType "_V1", IntType)]
+  | 4 -> string_of_mgu @@ mgu [(VarType "_V0", VarType "_V1"); (VarType "_V1", IntType)]
   | n -> failwith "Oops"
 
+let join_tests = function
+  | 1 -> string_of_subs @@ (
+      let sub1 = (create ())
+      and sub2 = (create ())
+      and sub3 = (create ())
+      in extend sub1 "u" @@ FuncType(IntType, FuncType(VarType "y", VarType "y"));
+      extend sub2 "x" @@ FuncType(VarType "y", VarType "y");
+      extend sub3 "z" @@ FuncType(IntType, VarType "x");
+      join [sub1;sub2;sub3])
+  | n -> failwith "Opps"
+
 let print_tests () = 
+  for i = 1 to 1 do
+    print_string @@ string_of_int i ^ " " ^ join_tests i;
+    print_string "\n";
+  done;
   for i=1 to 4 do
-    (* print_string @@ subst_tests i;
-       print_string "\n"; *)
-    print_string @@ inf @@ Examples.expr i;
+    print_string @@ string_of_int i ^ " " ^ mgu_tests i;
+    print_string "\n";
+    print_string @@ string_of_int i ^ " " ^ (inf @@ Examples.expr i);
     print_string "\n";
   done;
   for i=25 to 34 do
     (* print_string @@ subst_tests i;
        print_string "\n"; *)
-    print_string @@ inf @@ Examples.expr i;
+    print_string @@ string_of_int i ^ " " ^ (inf @@ Examples.expr i);
     print_string "\n";
   done;
