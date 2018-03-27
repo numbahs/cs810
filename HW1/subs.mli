@@ -13,7 +13,7 @@ val apply_to_texpr : subst -> Ast.texpr -> Ast.texpr
 
 (* val apply_to_expr : subst -> Ast.expr -> Ast.expr *)
 
-val apply_to_env : subst -> subst -> unit
+(* val apply_to_env : subst -> subst -> unit *)
 
 val domain : subst -> string list
 

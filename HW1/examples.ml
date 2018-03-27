@@ -1,3 +1,4 @@
+open Ast
 
 let expr = function
   | 1 -> "x"
@@ -9,7 +10,7 @@ let expr = function
   | 7 -> "(f 0)+1"
   | 8 -> "(0 f)"
   | 9 -> "((f 0) 1)"
-  | 10 -> "f (0 2)"
+  | 10 -> "(f (0 2))"
   | 11 -> "(((f x) y) z)"
   | 12 -> "(f ((x y) z))"
   | 13 -> "(f ((zero?(x) y) z))"
@@ -53,4 +54,15 @@ in (f (infiniteLoop 0))"
   | 32 -> "deref(1)"
   | 33 -> "setref(1, 1)"
   | 34 -> "setref(newref(1), newref(1))"
+  | 35 -> "x - (x 0)"
   | n -> failwith @@ "Expression " ^string_of_int  n ^ " is not defined"
+
+let mgu_tests2 = function
+  | 1 -> [(VarType "x", VarType "_V0")]
+  | 2 -> []
+  | 3 -> [(VarType "_V0", IntType); (VarType "_V1", IntType)]
+  | 4 -> [(VarType "_V0", VarType "_V1"); (VarType "_V1", IntType)]
+  | 5 -> [(FuncType (VarType "x", FuncType(VarType "y", VarType "x")), 
+           FuncType(VarType "y", FuncType(FuncType(VarType "x", IntType), VarType "x")))]
+  | 6 -> [(IntType, FuncType(VarType "_V1", VarType "_V2"))]
+  | n -> failwith "Oops"

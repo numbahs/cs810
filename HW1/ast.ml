@@ -102,7 +102,3 @@ let rec fv_of_type = function
   | VarType id -> SetStr.singleton id
   | FuncType(t1,t2) -> SetStr.union (fv_of_type t1) (fv_of_type t2)
   | RefType(t) -> fv_of_type t
-
-let string_of_varType = function
-  | VarType x -> x
-  | _ -> ""
