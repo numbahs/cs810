@@ -7,15 +7,23 @@ val extend : subst -> string -> Ast.texpr -> unit
 
 val remove : subst -> string -> unit
 
+val replace : subst -> string -> Ast.texpr -> unit
+
+val remove_all : subst list -> string -> unit
+
 val lookup : subst -> string -> Ast.texpr option
 
 val apply_to_texpr : subst -> Ast.texpr -> Ast.texpr
 
-(* val apply_to_expr : subst -> Ast.expr -> Ast.expr *)
+val apply_to_expr : subst -> Ast.expr -> Ast.expr
 
-(* val apply_to_env : subst -> subst -> unit *)
+val apply_to_env : subst -> subst -> unit
+
+val apply_to_envs : subst -> subst list -> subst list
 
 val domain : subst -> string list
+
+val check_all : subst list -> (Ast.texpr*Ast.texpr) list 
 
 val join : subst list -> subst
 
