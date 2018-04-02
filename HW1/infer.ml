@@ -170,34 +170,30 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
      | er -> er)
   | Letrec(tRes,x,param,tPara,def,body) -> 
     (match infer' (LetrecUntyped(x, param, def, body)) n with
-     | OK(n1, (tc1, e_ret1, t1)) -> 
-       extend tc1 param tPara;
-       (match infer' body n1 with
-        | OK(n2, (tc2, e_ret1, t2)) -> 
-          let ft = VarType("_V" ^ string_of_int n2) in
-          (match mgu @@ (ft, FuncType(tPara, tRes))::(tPara, t1)::check_all [tc1;tc2] with
-           | UOk sub -> OK(n2 + 1, 
-                           (join @@ apply_to_envs sub [tc1;tc2], 
-                            apply_to_expr sub @@ Letrec(t2, x, param, t1, def, body),
-                            apply_to_texpr sub t2))
-           | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
-        | er -> er)
+     | OK(n1, (tc1, (Letrec(tRes2,x2, param2, tPara2, def2, body2)), t1)) -> 
+       (match mgu [(tRes2, tRes);(tPara2, tPara)] with
+        | UOk sub -> OK(n1, 
+                        (join @@ apply_to_envs sub [tc1], 
+                         apply_to_expr sub @@ Letrec(tRes2, x2, param2, tPara2, def2, body2),
+                         apply_to_texpr sub t1))
+        | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
      | er -> er)
-  | LetrecUntyped(x,param,def,body) -> 
+  | LetrecUntyped(f,x,def,body) -> 
     (match infer' def n with
      | OK(n1, (tc1, e_ret1, t1)) -> 
        (match infer' body n1 with
         | OK(n2, (tc2, e_ret1, t2)) -> 
-          (match infer' (Var(x)) n2 with
+          (match infer' (Var(f)) n2 with
            | OK(n3, (tc3, e_ret1, t3)) ->  
-             let ft = VarType("_V" ^ string_of_int @@ n3) in
+             let ft = (match lookup tc1 x with
+                 | None -> VarType("_V" ^ string_of_int @@ n3)
+                 | Some(tx) -> tx) in remove tc1 x;
              (match mgu @@ (t3, FuncType(ft, t1))::(check_all [tc1;tc2;tc3]) with
               | UOk sub -> 
-                remove_all [tc1;tc2] x;
-                remove_all [tc1;tc2] param;
+                remove_all [tc1;tc2] f;
                 OK(n3 + 1, 
                    (join @@ apply_to_envs sub [tc1;tc2], 
-                    apply_to_expr sub @@ Letrec(t2, x, param, t1, def, body),
+                    apply_to_expr sub @@ Letrec(t1, f, x, ft, def, body),
                     apply_to_texpr sub t2))
               | UError (t3, t4) -> Error ("cannot unify " ^ (string_of_texpr t3) ^ " and " ^ (string_of_texpr t4)))
            | er -> er)
