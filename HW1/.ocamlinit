@@ -1,8 +1,10 @@
 #use "topfind";;
 #directory "_build";;
 #load_rec "infer.cmo";;
+#load_rec "tests.cmo";;
 
 open Infer;;
+open Tests;;
 
 (* Added by OPAM. *)
 let () =

@@ -1,6 +1,7 @@
 open Ast
+open Subs
 
-let expr = function
+let expr_cases = function
   | 1 -> "x"
   | 2 -> "0"
   | 3 -> "x-1"
@@ -46,9 +47,9 @@ in (f (infiniteLoop 0))"
   | 24 -> "deref(newref(1))"
   | 25 -> "setref(newref(1), 1)"
   | 26 -> "(f (f x))"
-  | n -> failwith @@ "Expression " ^string_of_int  n ^ " is not defined"
+  | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
 
-let should_fail = function
+let fail_cases = function
   | 1 -> "(0 f)"
   | 2 -> "(f (0 2))"
   | 3 -> "(f ((zero?(x) y) z))"
@@ -59,9 +60,27 @@ let should_fail = function
   | 8 -> "setref(1, 1)"
   | 9 -> "setref(newref(1), newref(1))"
   | 10 -> "if zero?(x) then x else zero?(x)"
-  | n -> failwith @@ "Expression " ^string_of_int  n ^ " is not defined"
+  | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
 
-let mgu_tests2 = function
+let join_cases = function
+  | 1 -> 
+    (let sub1 = (create ())
+     and sub2 = (create ())
+     and sub3 = (create ())
+     in extend sub1 "u" @@ FuncType(IntType, FuncType(VarType "y", VarType "y"));
+     extend sub2 "x" @@ FuncType(VarType "y", VarType "y");
+     extend sub3 "z" @@ FuncType(IntType, VarType "x");
+     join [sub1;sub2;sub3])
+  | 2 ->
+    (let sub1 = create()
+     and sub2 = create()
+     and sub3 = create()
+     in extend sub1 "x" @@ (VarType "_V0");
+     extend sub3 "_V0" IntType;
+     join[sub1;sub2;sub3])
+  | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
+
+let mgu_cases = function
   | 1 -> [(VarType "x", VarType "_V0")]
   | 2 -> []
   | 3 -> [(VarType "_V0", IntType); (VarType "_V1", IntType)]
@@ -70,4 +89,6 @@ let mgu_tests2 = function
            FuncType(VarType "y", FuncType(FuncType(VarType "x", IntType), VarType "x")))]
   | 6 -> [(IntType, FuncType(VarType "_V1", VarType "_V2"))]
   | 7 -> [(VarType "_V0", FuncType(VarType "_V1", VarType "_V2"))]
-  | n -> failwith "Oops"
+  | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
+
+

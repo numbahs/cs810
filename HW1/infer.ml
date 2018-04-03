@@ -1,7 +1,6 @@
 open Unification
 open Subs
 open Ast
-open Examples
 
 type 'a error = OK of 'a | Error of string
 
@@ -239,7 +238,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
 
 
 let string_of_typing_judgement (s,e,t) =
-  "\027[31m"^string_of_subs s^"\027[37m |- \027[34m"^string_of_expr e
+  "\027[31m"^string_of_subs s^"\027[37m ⊢ \027[34m"^string_of_expr e
   ^": \027[30m "^string_of_texpr t 
 
 let infer_type (AProg e) =
@@ -251,54 +250,3 @@ let parse s =
   let lexbuf = Lexing.from_string s in
   let ast = Parser.prog Lexer.read lexbuf in
   ast
-
-let mgu_tests (i:int) =
-  mgu_tests2 i |> mgu |> string_of_mgu
-
-(* Interpret an expression *)
-let inf (e:string) : string =
-  e |> parse |> infer_type
-
-let test (n:int) : string =
-  expr n |> parse |> infer_type
-
-let mgu_tests (i:int) =
-  mgu_tests2 i |> mgu |> string_of_mgu
-
-let join_tests = function
-  | 1 -> string_of_subs @@ 
-    (let sub1 = (create ())
-     and sub2 = (create ())
-     and sub3 = (create ())
-     in extend sub1 "u" @@ FuncType(IntType, FuncType(VarType "y", VarType "y"));
-     extend sub2 "x" @@ FuncType(VarType "y", VarType "y");
-     extend sub3 "z" @@ FuncType(IntType, VarType "x");
-     join [sub1;sub2;sub3])
-  | 2 -> string_of_subs @@ 
-    (let sub1 = create()
-     and sub2 = create()
-     and sub3 = create()
-     in extend sub1 "x" @@ (VarType "_V0");
-     extend sub3 "_V0" IntType;
-     join[sub1;sub2;sub3])
-  | n -> failwith "Opps"
-
-let print_tests () = 
-  for i = 1 to 2 do
-    print_string @@ string_of_int i ^ " " ^ join_tests i;
-    print_string "\n";
-  done;
-  for i=1 to 7 do
-    print_string @@ string_of_int i ^ " " ^ mgu_tests i;
-    print_string "\n";
-  done;
-  for i=1 to 26 do
-    print_string @@ "\027[30m" ^ string_of_int i ^ " " ^ (inf @@ Examples.expr i);
-    print_string "\n";
-  done;
-  print_string @@ "---------------------------------------------------- SHOULD FAIL -------------------------------------------------------------";
-  print_string "\n";
-  for i=1 to 10 do
-    print_string @@ "\027[30m" ^ string_of_int i ^ " " ^ (inf @@ Examples.should_fail i);
-    print_string "\n";
-  done;

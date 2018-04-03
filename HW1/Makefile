@@ -3,10 +3,13 @@
 OCB_FLAGS = -tag bin_annot -use-menhir -use-ocamlfind -pkgs oUnit
 OCB = ocamlbuild $(OCB_FLAGS)
 
-all: infer
+all: infer tests
 
 clean:
 	$(OCB) -clean
+
+tests:
+	$(OCB) tests.byte
 
 infer:
 	$(OCB) infer.byte
