@@ -47,6 +47,9 @@ in (f (infiniteLoop 0))"
   | 24 -> "deref(newref(1))"
   | 25 -> "setref(newref(1), 1)"
   | 26 -> "(f (f x))"
+  | 27 -> "
+letrec toZero(x:int):int = (if zero?(x) then (toZero (x-1)) else x)
+in (toZero 10)"
   | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
 
 let fail_cases = function
@@ -85,10 +88,15 @@ let mgu_cases = function
   | 2 -> []
   | 3 -> [(VarType "_V0", IntType); (VarType "_V1", IntType)]
   | 4 -> [(VarType "_V0", VarType "_V1"); (VarType "_V1", IntType)]
+  (* 5 Should Fail *)
   | 5 -> [(FuncType (VarType "x", FuncType(VarType "y", VarType "x")), 
            FuncType(VarType "y", FuncType(FuncType(VarType "x", IntType), VarType "x")))]
+  (* 6 Should Fail *)
   | 6 -> [(IntType, FuncType(VarType "_V1", VarType "_V2"))]
   | 7 -> [(VarType "_V0", FuncType(VarType "_V1", VarType "_V2"))]
+  | 8 -> [(VarType "_V0", BoolType); (VarType "_V1", VarType "_V0")]
+  | 9 -> [(VarType "_V0", VarType "_V1"); (FuncType(VarType "x", UnitType), VarType "_V1"); (VarType "x", BoolType)]
+  | 10 -> [(FuncType (VarType "should_be_bool", BoolType), FuncType(BoolType, BoolType))]
   | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
 
 

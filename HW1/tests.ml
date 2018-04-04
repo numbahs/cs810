@@ -31,7 +31,7 @@ let test_helper (fn) (str: string) (n:int) : unit =
   done;;
 
 let run_tests () : unit = 
-  test_helper expr_test "Expression" 26;
+  test_helper expr_test "Expression" 27;
   test_helper fail_test "Fail" 10;
   test_helper join_test "Join" 2;
-  test_helper mgu_test "MGU" 7;;
+  test_helper mgu_test "MGU" 10;;
