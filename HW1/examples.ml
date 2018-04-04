@@ -66,8 +66,9 @@ let mgu_tests2 = function
   | 2 -> []
   | 3 -> [(VarType "_V0", IntType); (VarType "_V1", IntType)]
   | 4 -> [(VarType "_V0", VarType "_V1"); (VarType "_V1", IntType)]
-  | 5 -> [(FuncType (VarType "x", FuncType(VarType "y", VarType "x")), 
+  | 5 -> [(FuncType(VarType "x", FuncType(VarType "y", VarType "x")), 
            FuncType(VarType "y", FuncType(FuncType(VarType "x", IntType), VarType "x")))]
   | 6 -> [(IntType, FuncType(VarType "_V1", VarType "_V2"))]
   | 7 -> [(VarType "_V0", FuncType(VarType "_V1", VarType "_V2"))]
+  | 8 -> [(VarType "_V1", VarType "_V0")]
   | n -> failwith "Oops"
