@@ -52,8 +52,7 @@ let rec apply_to_expr (s:subst) = function
                   apply_to_expr s def,
                   apply_to_expr s body) 
   | Set(x,rhs) -> Set(x, apply_to_expr s rhs)
-  | BeginEnd(es) -> 
-    BeginEnd(List.map (fun x -> apply_to_expr s x) es)
+  | BeginEnd(es) -> BeginEnd(List.map (apply_to_expr s) es)
 
 let apply_to_env (s1:subst) (s2:subst):unit = 
   Hashtbl.iter (fun k t1 -> replace s2 k @@ apply_to_texpr s1 t1) s2
