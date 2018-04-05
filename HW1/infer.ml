@@ -249,7 +249,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
 
 let string_of_typing_judgement (s,e,t) =
   "\027[31m"^string_of_subs s^"\027[37m ⊢ \027[34m"^string_of_expr e
-  ^": \027[30m "^string_of_texpr t 
+  ^": \027[35m "^string_of_texpr t 
 
 let infer_type (AProg e) =
   match infer' e 0 with
