@@ -98,5 +98,3 @@ let mgu_cases = function
   | 9 -> [(VarType "_V0", VarType "_V1"); (FuncType(VarType "x", UnitType), VarType "_V1"); (VarType "x", BoolType)]
   | 10 -> [(FuncType (VarType "should_be_bool", BoolType), FuncType(BoolType, BoolType))]
   | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
-
-

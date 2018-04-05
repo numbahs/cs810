@@ -20,7 +20,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
      | OK(n1, (tc1, e_ret1, t1)) -> 
        (match infer' e2 n1 with
         | OK(n2, (tc2, e_ret2, t2)) -> 
-          (match mgu [(t1, IntType);(t2, IntType)] with
+          (match mgu @@ (t1, IntType)::(t2, IntType)::(check_all [tc1;tc2]) with
            | UOk sub -> OK(n2, (join @@ apply_to_envs sub [tc1;tc2], 
                                 apply_to_expr sub @@ Add(e_ret1, e_ret2),
                                 IntType))
@@ -32,7 +32,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
      | OK(n1, (tc1, e_ret1, t1)) -> 
        (match infer' e2 n1 with
         | OK(n2, (tc2, e_ret2, t2)) -> 
-          (match mgu [(t1, IntType);(t2, IntType)] with
+          (match mgu @@ (t1, IntType)::(t2, IntType)::(check_all [tc1;tc2]) with
            | UOk sub -> OK(n2, (join @@ apply_to_envs sub [tc1;tc2],
                                 apply_to_expr sub @@ Sub(e_ret1, e_ret2),
                                 IntType))
@@ -44,7 +44,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
      | OK(n1, (tc1, e_ret1, t1)) -> 
        (match infer' e2 n1 with
         | OK(n2, (tc2, e_ret2, t2)) -> 
-          (match mgu [(t1, IntType);(t2, IntType)] with
+          (match mgu @@ (t1, IntType)::(t2, IntType)::(check_all [tc1;tc2]) with
            | UOk sub -> OK(n2, (join @@ apply_to_envs sub [tc1;tc2],
                                 apply_to_expr sub @@ Mul(e_ret1, e_ret2),
                                 IntType))
@@ -56,7 +56,7 @@ let rec infer' (e:expr) (n:int): (int*typing_judgement) error =
      | OK(n1, (tc1, e_ret1, t1)) -> 
        (match infer' e2 n1 with
         | OK(n2, (tc2, e_ret2, t2)) -> 
-          (match mgu [(t1, IntType);(t2, IntType)] with
+          (match mgu @@ (t1, IntType)::(t2, IntType)::(check_all [tc1;tc2]) with
            | UOk sub -> OK(n2, (join @@ apply_to_envs sub [tc1;tc2],
                                 apply_to_expr sub @@ Mul(e_ret1, e_ret2),
                                 IntType))
@@ -250,3 +250,4 @@ let parse s =
   let lexbuf = Lexing.from_string s in
   let ast = Parser.prog Lexer.read lexbuf in
   ast
+

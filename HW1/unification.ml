@@ -21,8 +21,8 @@ let rec mgu_help (lst:(texpr*texpr) list) (unif_lst:subst list):unif_result =
     let sub1 = create () in
     (match is_fresh_type s1, is_fresh_type s2 with
      | (true, true) -> 
-       let s_pair = low_high s1 s2 in
-       extend sub1 (fst s_pair) @@ VarType (snd s_pair)
+       let (low, high) = low_high s1 s2 in
+       extend sub1 low @@ VarType high
      | (_, _) -> extend sub1 s1 @@ VarType s2);
     mgu_help (List.map (fun (x, y) -> (apply_to_texpr sub1 x, apply_to_texpr sub1 y)) tl) (sub1::unif_lst)
   | (VarType s, t1)::tl | (t1, (VarType s))::tl -> 
