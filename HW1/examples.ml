@@ -50,6 +50,20 @@ in (f (infiniteLoop 0))"
   | 27 -> "
 letrec toZero(x:int):int = (if zero?(x) then (toZero (x-1)) else x)
 in (toZero 10)"
+  | 28 -> "letrec rip (x) = (rip x) in begin (rip g); rip end"
+  | 29 -> "if (x y) then y else 3"
+  | 30 -> "
+letrec fact (x:int):int = if zero?(x) then 1 else x*(fact (x-1))
+in (fact 7)"
+  | 31 -> "
+let false = zero?(1) in
+let true = zero?(0) in
+letrec bad (x: int): bool->bool = if zero?(x) then proc(x) {x} else proc(y) {y}
+in ((bad 7) false)"
+  | 32 -> "proc(x: unit) { (proc(y){y} zero?(1+(proc(x){x} 3))) }"
+  | 33 -> "let x = zero?(x) in if x then 1 else 2"
+  | 34 -> "newref((proc(x){x} 3))"
+  | 35 -> "begin (proc(x){x} 3) end"
   | n -> failwith @@ "Case " ^string_of_int  n ^ " is not defined"
 
 let fail_cases = function
